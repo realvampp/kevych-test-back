@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/shared/types/pagination';
 import { DataSource, Repository } from 'typeorm';
@@ -29,7 +33,9 @@ export class RoutesService {
         route: { id: route.id },
       })),
     );
-    await this.routeStationRepository.save(routeStations);
+    await this.routeStationRepository.save(routeStations).catch(() => {
+      throw new BadRequestException('wrong station id');
+    });
 
     route = await this.routeRepository.findOne({
       where: { id: route.id },
@@ -105,7 +111,9 @@ export class RoutesService {
           }),
       );
 
-      await manager.save(RouteStation, newRouteStations);
+      await manager.save(RouteStation, newRouteStations).catch(() => {
+        throw new BadRequestException('wrong station id');
+      });
 
       const updatedRoute = await manager.findOne(Route, {
         where: { id },
